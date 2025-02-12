@@ -13,7 +13,7 @@ extern "C"
 #define NUM_PCB 30
 #define QUANTUM 5 // Used for Robin Round for process as the run time limit
 
-/*
+
 unsigned int score;
 unsigned int total;
 
@@ -33,12 +33,12 @@ class GradeEnvironment : public testing::Environment
 			std::cout << "SCORE: " << score << '/' << total << std::endl;
 		}
 };
-*/
+
 
 
 int main(int argc, char **argv)
 {
-	// ::testing::InitGoogleTest(&argc, argv);
-	// ::testing::AddGlobalTestEnvironment(new GradeEnvironment);
+	::testing::InitGoogleTest(&argc, argv);
+	::testing::AddGlobalTestEnvironment(new GradeEnvironment);
 	return RUN_ALL_TESTS();
 }
