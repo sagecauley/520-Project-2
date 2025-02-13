@@ -25,11 +25,11 @@ add_library(dyn_array src/dyn_array.c)
 
 # Compile the analysis executable
 
-add_executable(analysis_test src/analysis.c)
+add_executable(analysis_code src/analysis.c)
 
 # link the dyn_array library we compiled against our analysis executable
 
-target_link_libraries(analysis_test dyn_array)
+target_link_libraries(analysis_code dyn_array)
 
 # Compile the tester executable
 add_executable(hw2_test test/tests.cpp)
