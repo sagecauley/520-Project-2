@@ -60,6 +60,8 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
 	//Need to use dyn_array_sort just not sure how atm
+	UNUSED(ready_queue);
+	UNUSED(result);
 	return false;
 }
 
