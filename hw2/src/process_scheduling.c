@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #include "dyn_array.h"
 #include "processing_scheduling.h"
@@ -82,8 +83,56 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 
 dyn_array_t *load_process_control_blocks(const char *input_file) 
 {
-	UNUSED(input_file);
-	return NULL;
+	if(!input_file){
+		return NULL;
+	}
+
+	// Open binary file for reading
+	int fd = open(input_file, O_RDONLY);
+	if (fd == -1) {
+		return NULL;
+	}
+
+	// Read first 32-bit integer, finds number of processes
+	uint32_t num_processes;
+	if (read(fd, &num_processes, sizeof(uint32_t)) != sizeof(uint32_t)) {
+		close(fd);
+		return NULL;
+	}
+
+	dyn_array_t *ready_queue = dyn_array_create(num_processes, sizeof(ProcessControlBlock_t), NULL);
+	if (!ready_queue) {
+		close(fd);
+		return NULL;
+	}
+
+	// Read data for each process
+	for(size_t i = 0; i < num_processes; i++){
+		ProcessControlBlock_t pcb;
+
+		// Burst time, priority, and arrival time reading
+		if(read(fd, &pcb.remaining_burst_time,sizeof(uint32_t)) != sizeof(uint32_t)) ||
+			read(fd, &pcb.priority, sizeof(uint32_t)) != sizeof(uint32_t) ||
+			read(fd, &pcb.arrival, sizeof(uint32_t)) != sizeof(uint32_t) {
+
+			// Reading failed
+			dyn_array_destroy(ready_queue);
+			close(fd);
+			return NULL;
+		}
+
+		pcb.started = false;
+
+		// Store PCB in array
+		if(!dyn_array_push_back(ready_queue, &pcb)) {
+			dyn_array_destroy(ready_queue);
+			close(fd);
+			return NULL;
+		}
+	}
+
+	close(fd);
+	return ready_queue;
 }
 
 bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
