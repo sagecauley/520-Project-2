@@ -37,14 +37,32 @@ class GradeEnvironment : public testing::Environment
 dyn_array_t* makePCB()
 {
 	dyn_array_t* pcb = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
+	
+	((ProcessControlBlock_t)((pcb->array)[0]))-> remaining_burst_time = 15;
+	((ProcessControlBlock_t)((pcb->array)[1]))-> remaining_burst_time = 10;
+	((ProcessControlBlock_t)((pcb->array)[2]))-> remaining_burst_time = 5;
+	((ProcessControlBlock_t)((pcb->array)[3]))-> remaining_burst_time = 20;
+	((ProcessControlBlock_t)((pcb->array)[0]))-> priority = 0;
+	((ProcessControlBlock_t)((pcb->array)[1]))-> priority = 0;
+	((ProcessControlBlock_t)((pcb->array)[2]))-> priority = 0;
+	((ProcessControlBlock_t)((pcb->array)[3]))-> priority = 0;
+	((ProcessControlBlock_t)((pcb->array)[0]))-> arrival = 0;
+	((ProcessControlBlock_t)((pcb->array)[1]))-> arrival = 1;
+	((ProcessControlBlock_t)((pcb->array)[2]))-> arrival = 2;
+	((ProcessControlBlock_t)((pcb->array)[3]))-> arrival = 3;
+	((ProcessControlBlock_t)((pcb->array)[0]))-> started = 0;
+	((ProcessControlBlock_t)((pcb->array)[1]))-> started = 0;
+	((ProcessControlBlock_t)((pcb->array)[2]))-> started = 0;
+	((ProcessControlBlock_t)((pcb->array)[3]))-> started = 0;
+	/*
 	ProcessControlBlock_t ctrb = {15, 0, 0, 0};
-	memcpy((pcb->array)[0], ctrb, sizeof(ProcessControlBlock_t)); 
+	memcpy(((pcb->array)+0), ctrb, sizeof(ProcessControlBlock_t)); 
 	ProcessControlBlock_t ctrb2 = {10, 0, 1, 0};
-	memcpy((pcb->array)[1], ctrb2, sizeof(ProcessControlBlock_t)); 
-	ProcessControlBlock_t ctrb = {5, 0, 2, 0};
-	memcpy((pcb->array)[2], ctrb, sizeof(ProcessControlBlock_t)); 
-	ProcessControlBlock_t ctrb2 = {20, 0, 3, 0};
-	memcpy((pcb->array)[3], ctrb2, sizeof(ProcessControlBlock_t)); 
+	memcpy(((pcb->array)+1), ctrb2, sizeof(ProcessControlBlock_t)); 
+	ProcessControlBlock_t ctrb3 = {5, 0, 2, 0};
+	memcpy(((pcb->array)+2), ctrb, sizeof(ProcessControlBlock_t)); 
+	ProcessControlBlock_t ctrb4 = {20, 0, 3, 0};
+	memcpy(((pcb->array)+0), &ctrb2, sizeof(ProcessControlBlock_t)); */
 	return pcb;
 }
 
