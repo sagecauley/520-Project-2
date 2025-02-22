@@ -53,7 +53,7 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		}
 
 		//Calculating the time this process has been waiting
-		int waiting_time = start_time - pcb->arrival;
+		int waiting_time = pcb->arrival - first_pcb->arrival;
 		total_waiting += waiting_time;
 
 		//Figuring out how much time this process will spend running
@@ -65,7 +65,7 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 
 	result->average_waiting_time = (float)total_waiting / n;
 	result->average_turnaround_time = (float)total_turnaround / n;
-	result->total_run_time = current;
+	result->total_run_time = current - first_pcb->arrival;
 
 	return true;
 }
