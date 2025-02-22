@@ -30,30 +30,42 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		return false;
 	}
 
+	//variables to hold the time
 	int current = 0;
 	int total_waiting = 0;
-	int total_running = 0;
+	int total_turnaround = 0;
+	ProcessControlBlock_t* first_pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, 0);
+	current = first_pcb->arrival;  // Start from first process's arrival time
 
+	
 	for (size_t i = 0; i < n; i++) {
-		if (current < pcbs[i].arrival) {
-			current = pcbs[i].arrival;
-		}
-		void* dyn_array_at(const dyn_array_t* const dyn_array, const size_t index);
-		ProcessControlBlock_t *pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
 
-		int waiting_time = current_time - pcb->arrival;
+		//gets the specific element at i
+		ProcessControlBlock_t *pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
+		
+		int start_time = 0;
+		//setting the start time for when the process arrives
+		if (current > pcb -> arrival) {
+			start_time = current;
+		}
+		else {
+			start_time = pcb->arrival;
+		}
+
+		//Calculating the time this process has been waiting
+		int waiting_time = pcb->arrival - first_pcb->arrival;
 		total_waiting += waiting_time;
 
-		current += pcb->remaining_burst_time;
+		//Figuring out how much time this process will spend running
+		current = start_time + pcb->remaining_burst_time;
 
-		int running_time = current - pcb->arrival;
-
-		total_running += running_time;
+		int turnaround = current - pcb->arrival;
+		total_turnaround += turnaround;
 	}
 
-	result->average_waiting_time = (uint32_t)total_waiting / n;
-	result->average_turnaround_time = (uint32_t)total_running / n;
-	result->total_run_time = current_time;
+	result->average_waiting_time = (float)total_waiting / n;
+	result->average_turnaround_time = (float)total_turnaround / n;
+	result->total_run_time = current - first_pcb->arrival;
 
 	return true;
 }
