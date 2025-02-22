@@ -11,8 +11,8 @@ project(hw2)
 # The options specified below are required, but additional options
 #  may be used.
 
-set(CMAKE_C_FLAGS "-std=c11 -Wall -Wextra -Wshadow -Werror")
-set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wshadow -Werror")
+set(CMAKE_C_FLAGS "-std=c11 -g -Wall -Wextra -Wshadow -Werror")
+set(CMAKE_CXX_FLAGS "-std=c++11 -g -Wall -Wextra -Wshadow -Werror")
 
 # Add our include directory to CMake's search paths
 # THIS IS REQUIRED
@@ -32,7 +32,7 @@ add_executable(analysis_code src/analysis.c)
 target_link_libraries(analysis_code dyn_array)
 
 # Compile the tester executable
-add_executable(hw2_test test/tests.cpp)
+add_executable(hw2_test test/tests.cpp ../src/process_scheduling.c)
 
 target_compile_definitions(hw2_test PRIVATE)
 
