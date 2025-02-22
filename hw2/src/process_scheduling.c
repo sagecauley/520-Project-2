@@ -123,9 +123,9 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
 		ProcessControlBlock_t pcb;
 
 		// Burst time, priority, and arrival time reading
-		if(read(fd, &pcb.remaining_burst_time,sizeof(uint32_t)) != sizeof(uint32_t)) ||
-			read(fd, &pcb.priority, sizeof(uint32_t)) != sizeof(uint32_t) ||
-			read(fd, &pcb.arrival, sizeof(uint32_t)) != sizeof(uint32_t) {
+		if ((read(fd, &pcb.remaining_burst_time, sizeof(uint32_t)) != sizeof(uint32_t)) ||
+		    (read(fd, &pcb.priority, sizeof(uint32_t)) != sizeof(uint32_t)) ||
+		    (read(fd, &pcb.arrival, sizeof(uint32_t)) != sizeof(uint32_t))) {
 
 			// Reading failed
 			dyn_array_destroy(ready_queue);
