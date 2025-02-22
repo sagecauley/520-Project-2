@@ -25,15 +25,15 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		return false;
 	}
 
-	int n = dyn_array_size(ready_queue);
+	size_t n = dyn_array_size(ready_queue);
 	if (n == 0) {
 		return false;
 	}
 
 	//variables to hold the time
-	int current = 0;
-	int total_waiting = 0;
-	int total_turnaround = 0;
+	uint32_t current = 0;
+	uint32_t total_waiting = 0;
+	uint32_t total_turnaround = 0;
 	ProcessControlBlock_t* first_pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, 0);
 	current = first_pcb->arrival;  // Start from first process's arrival time
 
@@ -123,9 +123,9 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
 		ProcessControlBlock_t pcb;
 
 		// Burst time, priority, and arrival time reading
-		if(read(fd, &pcb.remaining_burst_time,sizeof(uint32_t)) != sizeof(uint32_t)) ||
-			read(fd, &pcb.priority, sizeof(uint32_t)) != sizeof(uint32_t) ||
-			read(fd, &pcb.arrival, sizeof(uint32_t)) != sizeof(uint32_t) {
+		if ((read(fd, &pcb.remaining_burst_time, sizeof(uint32_t)) != sizeof(uint32_t)) ||
+		    (read(fd, &pcb.priority, sizeof(uint32_t)) != sizeof(uint32_t)) ||
+		    (read(fd, &pcb.arrival, sizeof(uint32_t)) != sizeof(uint32_t))) {
 
 			// Reading failed
 			dyn_array_destroy(ready_queue);
