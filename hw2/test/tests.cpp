@@ -34,7 +34,7 @@ class GradeEnvironment : public testing::Environment
 		}
 };
 
-dyn_array_t* makePCB()
+/*dyn_array_t* makePCB()
 {
 	dyn_array_t* pcb = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
 	ProcessControlBlock_t ctrb = {15, 0, 0, 0};
@@ -47,7 +47,7 @@ dyn_array_t* makePCB()
 	memcpy((pcb->array)[3], ctrb2, sizeof(ProcessControlBlock_t)); 
 	return pcb;
 }
-
+*/
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
@@ -69,7 +69,8 @@ TEST(PCB, GoodData)
 }
 TEST(FCFC, BadData)
 {
-	dyn_array_t * arPtr = makePCB();
+	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
+
 	ScheduleResult_t* schPtr = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
 	ASSERT_EQ(false, first_come_first_serve(NULL, schPtr));
 	ASSERT_EQ(false, first_come_first_serve(arPtr, NULL));
@@ -77,7 +78,7 @@ TEST(FCFC, BadData)
 }
 TEST(FCFS, GoodData)
 {
-	dyn_array_t * arPtr = makePCB();
+	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
 	ScheduleResult_t* schPtr = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
-	ASSERT_NE(nullptr, first_come_first_serve(arPtr, schPtr));
+	ASSERT_NE(false, first_come_first_serve(arPtr, schPtr));
 }
