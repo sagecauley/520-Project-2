@@ -34,6 +34,19 @@ class GradeEnvironment : public testing::Environment
 		}
 };
 
+dyn_array_t* makePCB()
+{
+	dyn_array_t* pcb = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
+	ProcessControlBlock_t ctrb = {15, 0, 0, 0};
+	memcpy((pcb->array)[0], ctrb, sizeof(ProcessControlBlock_t)); 
+	ProcessControlBlock_t ctrb2 = {10, 0, 1, 0};
+	memcpy((pcb->array)[1], ctrb2, sizeof(ProcessControlBlock_t)); 
+	ProcessControlBlock_t ctrb = {5, 0, 2, 0};
+	memcpy((pcb->array)[2], ctrb, sizeof(ProcessControlBlock_t)); 
+	ProcessControlBlock_t ctrb2 = {20, 0, 3, 0};
+	memcpy((pcb->array)[3], ctrb2, sizeof(ProcessControlBlock_t)); 
+	return pcb;
+}
 
 int main(int argc, char **argv)
 {
@@ -56,9 +69,15 @@ TEST(PCB, GoodData)
 }
 TEST(FCFC, BadData)
 {
-	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
-	ScheduleResult_t* schPtr = (ScheduleResult_t*)(sizeof(ScheduleResult_t));
+	dyn_array_t * arPtr = makePCB();
+	ScheduleResult_t* schPtr = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
 	ASSERT_EQ(false, first_come_first_serve(NULL, schPtr));
 	ASSERT_EQ(false, first_come_first_serve(arPtr, NULL));
 	//ASSERT_EQ(false, first_come_first_serve(arrPtr, NULL))
+}
+TEST(FCFS, GoodData)
+{
+	dyn_array_t * arPtr = makePCB();
+	ScheduleResult_t* schPtr = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
+	ASSERT_NE(nullptr, first_come_first_serve(arPtr, schPtr));
 }
