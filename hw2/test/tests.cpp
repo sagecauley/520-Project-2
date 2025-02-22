@@ -62,7 +62,7 @@ TEST(PCB, BadData)
 }
 TEST(PCB, GoodData)
 {
-	dyn_array_t* ptr = load_process_control_blocks("pcb.bin");
+	dyn_array_t* ptr = load_process_control_blocks("../pcb.bin");
 	ASSERT_NE((dyn_array_t*)NULL, ptr);
 
 	free(ptr);
