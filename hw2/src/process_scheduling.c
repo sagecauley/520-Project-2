@@ -34,13 +34,15 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 	int total_running = 0;
 
 	for (size_t i = 0; i < n; i++) {
-		if (current < pcbs[i].arrival) {
-			current = pcbs[i].arrival;
-		}
+
 		void* dyn_array_at(const dyn_array_t* const dyn_array, const size_t index);
 		ProcessControlBlock_t *pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
 
-		int waiting_time = current_time - pcb->arrival;
+		if (current < pcb -> arrival) {
+			current = pcb -> arrival;
+		}
+
+		int waiting_time = current - pcb->arrival;
 		total_waiting += waiting_time;
 
 		current += pcb->remaining_burst_time;
@@ -52,7 +54,7 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 
 	result->average_waiting_time = (uint32_t)total_waiting / n;
 	result->average_turnaround_time = (uint32_t)total_running / n;
-	result->total_run_time = current_time;
+	result->total_run_time = current;
 
 	return true;
 }
