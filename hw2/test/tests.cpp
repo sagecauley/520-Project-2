@@ -34,38 +34,20 @@ class GradeEnvironment : public testing::Environment
 		}
 };
 
-/*dyn_array_t* makePCB()
+dyn_array* makePCB()
 {
-	dyn_array_t* pcb = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
-	
-	((ProcessControlBlock_t)((pcb->array)[0]))-> remaining_burst_time = 15;
-	((ProcessControlBlock_t)((pcb->array)[1]))-> remaining_burst_time = 10;
-	((ProcessControlBlock_t)((pcb->array)[2]))-> remaining_burst_time = 5;
-	((ProcessControlBlock_t)((pcb->array)[3]))-> remaining_burst_time = 20;
-	((ProcessControlBlock_t)((pcb->array)[0]))-> priority = 0;
-	((ProcessControlBlock_t)((pcb->array)[1]))-> priority = 0;
-	((ProcessControlBlock_t)((pcb->array)[2]))-> priority = 0;
-	((ProcessControlBlock_t)((pcb->array)[3]))-> priority = 0;
-	((ProcessControlBlock_t)((pcb->array)[0]))-> arrival = 0;
-	((ProcessControlBlock_t)((pcb->array)[1]))-> arrival = 1;
-	((ProcessControlBlock_t)((pcb->array)[2]))-> arrival = 2;
-	((ProcessControlBlock_t)((pcb->array)[3]))-> arrival = 3;
-	((ProcessControlBlock_t)((pcb->array)[0]))-> started = 0;
-	((ProcessControlBlock_t)((pcb->array)[1]))-> started = 0;
-	((ProcessControlBlock_t)((pcb->array)[2]))-> started = 0;
-	((ProcessControlBlock_t)((pcb->array)[3]))-> started = 0;
-	/*
-	ProcessControlBlock_t ctrb = {15, 0, 0, 0};
-	memcpy(((pcb->array)+0), ctrb, sizeof(ProcessControlBlock_t)); 
-	ProcessControlBlock_t ctrb2 = {10, 0, 1, 0};
-	memcpy(((pcb->array)+1), ctrb2, sizeof(ProcessControlBlock_t)); 
-	ProcessControlBlock_t ctrb3 = {5, 0, 2, 0};
-	memcpy(((pcb->array)+2), ctrb, sizeof(ProcessControlBlock_t)); 
+	dyn_array_t* pcb = dyn_array_create(0, sizeof(ProcessControlBlock_t), NULL);
 	ProcessControlBlock_t ctrb4 = {20, 0, 3, 0};
-	memcpy(((pcb->array)+0), &ctrb2, sizeof(ProcessControlBlock_t)); */
+	dyn_array_push_front(pcb, &ctrb4);
+	ProcessControlBlock_t ctrb3 = {5, 0, 2, 0};
+	dyn_array_push_front(pcb, &ctrb3);
+	ProcessControlBlock_t ctrb2 = {10, 0, 1, 0};
+	dyn_array_push_front(pcb, &ctrb2);
+	ProcessControlBlock_t ctrb = {15, 0, 0, 0};
+	dyn_array_push_front(pcb, &ctrb);
 	return pcb;
 }
-*/
+
 int main(int argc, char **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
@@ -81,8 +63,14 @@ TEST(PCB, BadData)
 TEST(PCB, GoodData)
 {
 	dyn_array_t* ptr = load_process_control_blocks("../pcb.bin");
+	dyn_array_t * arPtr = makePCB();
 	ASSERT_NE((dyn_array_t*)NULL, ptr);
-
+	ASSERT_EQ(dyn_array_size(ptr), dyn_array_size(arPtr));
+	ASSERT_EQ(dyn_array_data_size(ptr), dyn_array_data_size(arPtr));
+	for(size_t i = 0; i < dyn_array_size(ptr); i++)
+	{
+		ASSERT_EQ(((ProcessControlBlock_t*)dyn_array_at(ptr, i))->remaining_burst_time, ((ProcessControlBlock_t*)dyn_array_at(arPtr, i))->remaining_burst_time);
+	}
 	free(ptr);
 }
 TEST(FCFC, BadData)
@@ -92,11 +80,13 @@ TEST(FCFC, BadData)
 	ScheduleResult_t* schPtr = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
 	ASSERT_EQ(false, first_come_first_serve(NULL, schPtr));
 	ASSERT_EQ(false, first_come_first_serve(arPtr, NULL));
-	//ASSERT_EQ(false, first_come_first_serve(arrPtr, NULL))
 }
 TEST(FCFS, GoodData)
 {
-	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
+	dyn_array_t * arPtr = makePCB();
 	ScheduleResult_t* schPtr = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
 	ASSERT_NE(false, first_come_first_serve(arPtr, schPtr));
+	ASSERT_EQ(17.5, schPtr->average_waiting_time);
+	ASSERT_EQ(12.5, schPtr->average_turnaround_time);
+	ASSERT_EQ((unsigned long)50, schPtr->total_run_time);
 }

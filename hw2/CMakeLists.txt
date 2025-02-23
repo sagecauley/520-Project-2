@@ -32,7 +32,7 @@ add_executable(analysis_code src/analysis.c)
 target_link_libraries(analysis_code dyn_array)
 
 # Compile the tester executable
-add_executable(hw2_test test/tests.cpp ../src/process_scheduling.c)
+add_executable(hw2_test test/tests.cpp ../src/process_scheduling.c ../src/dyn_array.c)
 
 target_compile_definitions(hw2_test PRIVATE)
 
