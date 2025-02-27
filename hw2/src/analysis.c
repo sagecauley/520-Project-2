@@ -21,12 +21,12 @@ int main(int argc, char **argv)
 
 	dyn_array_t* ready_queue = NULL;
 
-	FILE* file = fopen(argv[1], "r");
+	/*FILE* file = fopen(argv[1], "r");
 	if (!file) {
 		return EXIT_FAILURE;
-	}
+	}*/
 
-	ready_queue = load_pcb_file(file);
+	ready_queue = load_process_control_blocks(argv[1]);
 
 	if (!ready_queue || dyn_array_size(ready_queue) == 0) {
 		return EXIT_FAILURE;
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 			printf("FCFS:\n");
 			printf("Average Waiting Time: %.2f\n", result.average_waiting_time);
 			printf("Average Turnaround Time: %.2f\n", result.average_turnaround_time);
-			printf("Total Run Time: %u\n", result.total_run_time);
+			printf("Total Run Time: %lu\n", result.total_run_time);
 		}
 		else
 		{
