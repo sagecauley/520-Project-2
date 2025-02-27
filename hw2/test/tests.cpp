@@ -54,6 +54,8 @@ int main(int argc, char **argv)
 	::testing::AddGlobalTestEnvironment(new GradeEnvironment);
 	return RUN_ALL_TESTS();
 }
+
+// PCB Testing --
 TEST(PCB, BadData)
 {
 	//Test
@@ -73,6 +75,8 @@ TEST(PCB, GoodData)
 	}
 	free(ptr);
 }
+
+// FCFC Testing --
 TEST(FCFC, BadData)
 {
 	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
@@ -89,4 +93,50 @@ TEST(FCFS, GoodData)
 	ASSERT_EQ(17.5, schPtr->average_waiting_time);
 	ASSERT_EQ(12.5, schPtr->average_turnaround_time);
 	ASSERT_EQ((unsigned long)50, schPtr->total_run_time);
+}
+
+// Priority Testing ---
+TEST(Priority, BasicOrder)
+{
+    dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
+    ASSERT_NE(ready_queue, nullptr);
+
+    ProcessControlBlock_t pcb1 = {5, 2, 0, false}; 
+    ProcessControlBlock_t pcb2 = {3, 1, 1, false}; 
+    ProcessControlBlock_t pcb3 = {2, 3, 2, false}; 
+
+    dyn_array_push_back(ready_queue, &pcb1);
+    dyn_array_push_back(ready_queue, &pcb2);
+    dyn_array_push_back(ready_queue, &pcb3);
+
+    ScheduleResult_t result;
+    ASSERT_TRUE(priority(ready_queue, &result));
+
+    EXPECT_NEAR(result.average_waiting_time, 3.67, 0.1); 
+    EXPECT_NEAR(result.average_turnaround_time, 7.0, 0.1); 
+    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(11)); 
+
+    dyn_array_destroy(ready_queue);
+}
+TEST(Priority, IdenticalPriorities)
+{
+    dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
+    ASSERT_NE(ready_queue, nullptr);
+
+    ProcessControlBlock_t pcb1 = {4, 1, 0, false}; 
+    ProcessControlBlock_t pcb2 = {3, 1, 1, false}; 
+    ProcessControlBlock_t pcb3 = {2, 1, 2, false}; 
+
+    dyn_array_push_back(ready_queue, &pcb1);
+    dyn_array_push_back(ready_queue, &pcb2);
+    dyn_array_push_back(ready_queue, &pcb3);
+
+    ScheduleResult_t result;
+    ASSERT_TRUE(priority(ready_queue, &result));
+
+    EXPECT_NEAR(result.average_waiting_time, 2.67, 0.1);
+    EXPECT_NEAR(result.average_turnaround_time, 5.67, 0.1);
+    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(9)); 
+
+    dyn_array_destroy(ready_queue);
 }
