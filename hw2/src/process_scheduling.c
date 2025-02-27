@@ -63,11 +63,59 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 	return false;
 }
 
+// Priority Helper Function: Sorting for priority-based scheduling
+int compare_priority(const void *a, const void *b){
+	const ProcessControlBlock_t *pcb_a = (const ProcessControlBlock_t *)a;
+	const ProcessControlBlock_t *pcb_b = (const ProcessControlBlock_t *)b; 
+
+	if(pcb_a->priority == pcb_b->priority){
+		return(pcb_a->arrival - pcb_b->arrival);
+	}
+	
+	return(pcb_a->priority - pcb_b->priority);
+}
+
 bool priority(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
-	UNUSED(ready_queue);
-	UNUSED(result);
-	return false;
+	if(ready_queue == NULL || result == NULL){
+		return false;
+	}
+
+	size_t n = dyn_array_size(ready_queue);
+	if(n == 0){
+		return false;
+	}
+
+	// Sort ready queue based on prirority and arrival time
+	dyn_array_sort(ready_queue, compare_priority);
+
+	uint32_t current_time = 0;
+	uint32_t total_waiting = 0;
+	uint32_t total_turnaround = 0;
+
+	for(size_t i = 0; i < n; i++){
+		ProcessControlBlock_t *pcb = (ProcessControlBlock_t *)dyn_array_at(ready_queue, i);
+
+		// Make sure CPU time starts when process arrives
+		if(current_time < pcb->arrival){
+			current_time = pcb->arrival;
+		}
+
+		uint32_t start_time = (current_time > pcb->arrival) ? current_time : pcb->arrival;
+        uint32_t waiting_time = start_time - pcb->arrival;
+        total_waiting += waiting_time;
+
+		// Run for full burst time
+		current_time += pcb->remaining_burst_time;
+		uint32_t turnaround_time = current_time - pcb->arrival;
+		total_turnaround += turnaround_time;
+	}
+
+	result->average_waiting_time = (float)total_waiting / n;
+	result->average_turnaround_time = (float)total_turnaround / n;
+	result->total_run_time = current_time;
+
+	return true;
 }
 
 bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quantum) 
