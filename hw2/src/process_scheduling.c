@@ -19,6 +19,12 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 	--process_control_block->remaining_burst_time;
 }
 
+int compare_arrival_time(const void* a, const void* b) {
+	const ProcessControlBlock_t *pcb1 = (const ProcessControlBlock_t*)a;
+	const ProcessControlBlock_t *pcb2 = (const ProcessControlBlock_t*)b;
+
+	return pcb1->arrival_time - pcb2->arrival_time;
+}
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
 	if (ready_queue == NULL || result == NULL) {
@@ -31,11 +37,10 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 	}
 
 	//variables to hold the time
-	//uint32_t start = 0;
 	uint32_t total_waiting = 0;
 	uint32_t total_turnaround = 0;
-	//ProcessControlBlock_t* first_pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, 0);
-	//start = first_pcb->arrival;  // Start from first process's arrival time
+
+	dyn_array_sort(ready_queue, compare_arrival_time);
 
 	
 	for (size_t i = 0; i < n; i++) {
@@ -54,6 +59,7 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 
 	return true;
 }
+
 
 bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
