@@ -243,6 +243,9 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
 	}
 
 	close(fd);
+
+	// Sort processes by arrival time
+	dyn_array_sort(ready_queue, compare_arrival_time);
 	return ready_queue;
 }
 
