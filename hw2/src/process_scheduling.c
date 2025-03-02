@@ -65,7 +65,6 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		current += pcb->remaining_burst_time;
 		total_turnaround += current - pcb->arrival;
 		total_run += pcb->remaining_burst_time;
-		free(pcb);
 	}
 
 	result->average_waiting_time = (float)total_waiting / n;
@@ -75,7 +74,7 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 }
 
 
-bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
+bool shortest_job_first(dyn_array_t* ready_queue, ScheduleResult_t* result)
 {
 	//Need to use dyn_array_sort just not sure how atm
 	if (ready_queue == NULL || result == NULL) {
