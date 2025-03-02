@@ -58,9 +58,10 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		ProcessControlBlock_t *pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
 		//if the current gets to be greater than the arrival then it resets since wait would be 0 and the ones after would only be waiting for this current process to end
 		if (current < pcb->arrival) {
-			current = 0;
+			current = pcb->arrival;
 		}
 		total_waiting += current - pcb->arrival;
+
 		current += pcb->remaining_burst_time;
 		total_turnaround += current - pcb->arrival;
 		total_run += pcb->remaining_burst_time;
@@ -152,49 +153,56 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 	//variables to hold the time
 	uint32_t total_waiting = 0;
 	uint32_t total_turnaround = 0;
+	uint32_t current = 0;
+	uint32_t total_run = 0;
 
 	dyn_array_sort(ready_queue, compare_arrival_time);
 
 
 	for (size_t i = 0; i < n; i++) {
-
+		//needs to get sorted everytime before grabbing the next element because a new process might have arrived
+		dyn_array_sort(ready_queue, compare_arrival_time);
 		//gets the specific element at i
 		ProcessControlBlock_t* pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
+		if (i + 1 < n) {
+			ProcessControlBlock_t* pcb2 = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i + 1);
+			//seeing if the first process and second process arrivals are equal then it will choose to run the one that hasn't ran before if one hasn't
+			if (pcb->started && pcb->arrival == pcb2->arrival && pcb2->started == false) {
+				pcb = pcb2;
+			}
+		}
 		
 		if (pcb->remaining_burst_time > quantum) {
-			//to hold the element to be moved
-			void* data = malloc(sizeof(ProcessControlBlock_t));
-			//adds the total time to waiting before adding the current burst
-			total_waiting += total_turnaround;
-			total_turnaround += quantum;
-			pcb->remaining_burst_time -= quantum;
-			
-			if (dyn_array_extract_front(ready_queue, data)) {
-				if (dyn_array_push_back(ready_queue, data)) {
-					free(data);
-					n++;
-				}
-				else {
-					free(data);
-					return false;
-				}
-			}
-			else {
-				free(data);
-				return false;
+			if (current < pcb->arrival) {
+				current = pcb->arrival;
 			}
 
+			//adds the total time to waiting before adding the current burst
+			total_waiting += current - pcb ->arrival;
+			//updates current after the process is ran
+			current += quantum;
+			total_turnaround += current - pcb->arrival;
+			total_run += quantum;
+			pcb->remaining_burst_time -= quantum;
+			//gets pushed to the back at the current time
+			pcb->arrival = current;
+			pcb->started = true;
 		}
 		else {
-			total_waiting += total_turnaround;
-			total_turnaround += pcb->remaining_burst_time;
+			if (current < pcb->arrival) {
+				current = pcb->arrival;
+			}
+			total_waiting += current - pcb->arrival;
+			current += pcb->remaining_burst_time;
+			total_turnaround += current - pcb ->arrival;
+			total_run += pcb->remaining_burst_time;
 		}
 
 	}
 
 	result->average_waiting_time = (float)total_waiting / n;
 	result->average_turnaround_time = (float)total_turnaround / n;
-	result->total_run_time = total_turnaround;
+	result->total_run_time = total_run;
 	
 	return true;
 }
