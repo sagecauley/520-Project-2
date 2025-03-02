@@ -82,25 +82,26 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		return false;
 	}
 	dyn_array_sort(ready_queue, compare_arrival_time);
+	size_t maxIndexSched = 0;
 	ProcessControlBlock_t* currBlock = dyn_array_at(ready_queue, 0);
-	int currTime = currBlock->arrival + currBlock->remaining_burst_time;
+	uint32_t currTime = currBlock->arrival + currBlock->remaining_burst_time;
 	int totalWatingTime = 0;
 	int totalTurnaroundTime = currBlock->remaining_burst_time;
 	int totalRunTime = currBlock->remaining_burst_time;
 	dyn_array_pop_front(ready_queue);
-	int currInd = 0;
-	int schedInd = 0;
-	int shortestTime = INT32_MAX;
+	size_t currInd = 0;
+	size_t schedInd = 0;
+	uint32_t shortestTime = __UINT32_MAX__;
 	size_t numPCB = dyn_array_size(ready_queue);
 	for(size_t i = 0; i < numPCB; i++)
 	{
 		currInd = 0;
 		schedInd = 0;
-		shortestTime = INT32_MAX;
+		shortestTime = __UINT32_MAX__;
 		currBlock = dyn_array_at(ready_queue, currInd);
-		while(currBlock->arrival <= currTime)
+		while(currBlock->arrival <= currTime && currBlock->started == 0)
 		{
-			if(currBlock->remaining_burst_time < shortestTime && currBlock->started == 0)
+			if(currBlock->remaining_burst_time < shortestTime)
 			{
 				schedInd = currInd;
 				shortestTime = currBlock->remaining_burst_time;
@@ -109,8 +110,11 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 			currInd++;
 			currBlock = dyn_array_at(ready_queue, currInd);
 		}	
+		
 		currBlock = dyn_array_at(ready_queue, schedInd);
-		if(currBlock ->arrival <= currTime )
+		if(currBlock->started == 1)
+			currBlock = dyn_array_at(ready_queue, maxIndexSched+1);
+		if(currBlock ->arrival <= currTime)
 		{
 			totalWatingTime = currTime - currBlock->arrival;
 			totalTurnaroundTime = (currTime - currBlock->arrival) + currBlock->remaining_burst_time;
@@ -131,6 +135,7 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		else{
 			currBlock ->started = 1;
 		}
+		maxIndexSched = maxIndexSched > schedInd ? maxIndexSched : schedInd;
 	}
 	result->average_waiting_time = (float) totalWatingTime / (numPCB+1);
 	result->average_turnaround_time = (float)totalTurnaroundTime / (numPCB+1);
