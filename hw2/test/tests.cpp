@@ -271,3 +271,71 @@ TEST(round_robin, GoodData){
 	dyn_array_destroy(ready_queue);
     free(result);
 }
+TEST(SRTF, BasicScheduling) {
+    dyn_array_t *ready_queue = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
+    ASSERT_NE(ready_queue, nullptr);
+
+    // Burst Time, Priority, Arrival Time, Started
+    ProcessControlBlock_t pcb1 = {8, 0, 0, false};  
+    ProcessControlBlock_t pcb2 = {4, 0, 1, false};  
+    ProcessControlBlock_t pcb3 = {2, 0, 2, false};  
+    ProcessControlBlock_t pcb4 = {1, 0, 3, false};  
+
+    dyn_array_push_back(ready_queue, &pcb1);
+    dyn_array_push_back(ready_queue, &pcb2);
+    dyn_array_push_back(ready_queue, &pcb3);
+    dyn_array_push_back(ready_queue, &pcb4);
+
+    ScheduleResult_t result;
+    ASSERT_TRUE(shortest_remaining_time_first(ready_queue, &result));
+
+    EXPECT_NEAR(result.average_waiting_time, 2.75, 0.1); 
+    EXPECT_NEAR(result.average_turnaround_time, 6.5, 0.1);
+    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(15)); 
+
+    dyn_array_destroy(ready_queue);
+}
+
+TEST(SRTF, LateShortProcess) {
+    dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
+    ASSERT_NE(ready_queue, nullptr);
+
+    ProcessControlBlock_t pcb1 = {10, 0, 0, false};  
+    ProcessControlBlock_t pcb2 = {2, 0, 3, false};  
+    ProcessControlBlock_t pcb3 = {1, 0, 5, false};  
+
+    dyn_array_push_back(ready_queue, &pcb1);
+    dyn_array_push_back(ready_queue, &pcb2);
+    dyn_array_push_back(ready_queue, &pcb3);
+
+    ScheduleResult_t result;
+    ASSERT_TRUE(shortest_remaining_time_first(ready_queue, &result));
+
+    EXPECT_NEAR(result.average_waiting_time, 1, 0.1); 
+    EXPECT_NEAR(result.average_turnaround_time, 5.33, 0.1);
+    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(13)); 
+
+    dyn_array_destroy(ready_queue);
+}
+
+TEST(SRTF, FirstProcessFinishesBeforeOthersArrive) {
+    dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
+    ASSERT_NE(ready_queue, nullptr);
+
+    ProcessControlBlock_t pcb1 = {4, 0, 0, false};  
+    ProcessControlBlock_t pcb2 = {6, 0, 5, false};  
+    ProcessControlBlock_t pcb3 = {3, 0, 7, false};  
+
+    dyn_array_push_back(ready_queue, &pcb1);
+    dyn_array_push_back(ready_queue, &pcb2);
+    dyn_array_push_back(ready_queue, &pcb3);
+
+    ScheduleResult_t result;
+    ASSERT_TRUE(shortest_remaining_time_first(ready_queue, &result));
+
+    EXPECT_NEAR(result.average_waiting_time, 1, 0.1); 
+    EXPECT_NEAR(result.average_turnaround_time, 5.0, 0.1);
+    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(13)); 
+
+    dyn_array_destroy(ready_queue);
+}
