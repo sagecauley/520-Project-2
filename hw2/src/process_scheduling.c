@@ -20,15 +20,15 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 }
 
 int compare_remaining_time(const void* a, const void* b) {
-	const ProcessControlBlock_t* pcb1 = (const ProcessControlBlock_t*)a;
-	const ProcessControlBlock_t* pcb2 = (const ProcessControlBlock_t*)b;
+	ProcessControlBlock_t* pcb1 = (ProcessControlBlock_t*)a;
+	ProcessControlBlock_t* pcb2 = (ProcessControlBlock_t*)b;
 
 	return pcb1->remaining_burst_time - pcb2->remaining_burst_time;
 }
 
 int compare_arrival_time(const void* a, const void* b) {
-	const ProcessControlBlock_t *pcb1 = (const ProcessControlBlock_t*)a;
-	const ProcessControlBlock_t *pcb2 = (const ProcessControlBlock_t*)b;
+	ProcessControlBlock_t *pcb1 = (ProcessControlBlock_t*)a;
+	ProcessControlBlock_t *pcb2 = (ProcessControlBlock_t*)b;
 
 	return pcb1->arrival - pcb2->arrival;
 }
@@ -46,23 +46,30 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 	//variables to hold the time
 	uint32_t total_waiting = 0;
 	uint32_t total_turnaround = 0;
+	//total current time
+	uint32_t current = 0;
+	uint32_t total_run = 0;
 
 	dyn_array_sort(ready_queue, compare_arrival_time);
 
 	
 	for (size_t i = 0; i < n; i++) {
-
 		//gets the specific element at i
 		ProcessControlBlock_t *pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
-
-		total_waiting += total_turnaround;
-		total_turnaround += pcb->remaining_burst_time;
+		//if the current gets to be greater than the arrival then it resets since wait would be 0 and the ones after would only be waiting for this current process to end
+		if (current < pcb->arrival) {
+			current = 0;
+		}
+		total_waiting += current - pcb->arrival;
+		current += pcb->remaining_burst_time;
+		total_turnaround += current - pcb->arrival;
+		total_run += pcb->remaining_burst_time;
 		
 	}
 
 	result->average_waiting_time = (float)total_waiting / n;
 	result->average_turnaround_time = (float)total_turnaround / n;
-	result->total_run_time =  total_turnaround;
+	result->total_run_time =  total_run;
 
 	return true;
 }

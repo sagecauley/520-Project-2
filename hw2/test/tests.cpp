@@ -90,8 +90,8 @@ TEST(FCFS, GoodData)
 	dyn_array_t * arPtr = makePCB();
 	ScheduleResult_t* schPtr = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
 	ASSERT_NE(false, first_come_first_serve(arPtr, schPtr));
-	ASSERT_EQ(17.5, schPtr->average_waiting_time);
-	ASSERT_EQ(12.5, schPtr->average_turnaround_time);
+	ASSERT_EQ(16, schPtr->average_waiting_time);
+	ASSERT_EQ(28.5, schPtr->average_turnaround_time);
 	ASSERT_EQ((unsigned long)50, schPtr->total_run_time);
 }
 
