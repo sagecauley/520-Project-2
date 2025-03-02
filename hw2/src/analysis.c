@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 	if (!file) {
 		return EXIT_FAILURE;
 	}*/
-
+	//loading the queue up
 	ready_queue = load_process_control_blocks(argv[1]);
 
 	if (!ready_queue || dyn_array_size(ready_queue) == 0) {
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 
 	
 
-
+	//Checks to see which algoithm it is running
 	if (memcmp(algorithm, FCFS, 4) == 0) {
 		if (first_come_first_serve(ready_queue, &result))
 		{
@@ -67,6 +67,7 @@ int main(int argc, char **argv)
 		}
 	}
 	if (memcmp(algorithm, RR, 2) == 0) {
+		//gets the quantum from argv[3] and is converting it to numeric value
 		size_t quantum = 0;
 		for (int i = 0; argv[3][i] != '\0'; i++) {
 			if (argv[3][i] >= '0' && argv[3][i] <= '9') {
