@@ -102,7 +102,11 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		while(currBlock->arrival <= currTime)
 		{
 			if(currBlock->remaining_burst_time < shortestTime && currBlock->started == 0)
+			{
 				schedInd = currInd;
+				shortestTime = currBlock->remaining_burst_time;
+			}
+				
 			currInd++;
 			currBlock = dyn_array_at(ready_queue, currInd);
 		}	
