@@ -96,33 +96,12 @@ TEST(FCFS, GoodData)
 }
 
 // Priority Testing ---
-TEST(Priority, BasicOrder)
-{
-    dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
-    ASSERT_NE(ready_queue, nullptr);
-
-    ProcessControlBlock_t pcb1 = {5, 2, 0, false}; 
-    ProcessControlBlock_t pcb2 = {3, 1, 1, false}; 
-    ProcessControlBlock_t pcb3 = {2, 3, 2, false}; 
-
-    dyn_array_push_back(ready_queue, &pcb1);
-    dyn_array_push_back(ready_queue, &pcb2);
-    dyn_array_push_back(ready_queue, &pcb3);
-
-    ScheduleResult_t result;
-    ASSERT_TRUE(priority(ready_queue, &result));
-
-    EXPECT_NEAR(result.average_waiting_time, 3.67, 0.1); 
-    EXPECT_NEAR(result.average_turnaround_time, 7.0, 0.1); 
-    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(11)); 
-
-    dyn_array_destroy(ready_queue);
-}
 TEST(Priority, IdenticalPriorities)
 {
     dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
     ASSERT_NE(ready_queue, nullptr);
 
+	// Burst Time, Priority, Arrival Time
     ProcessControlBlock_t pcb1 = {4, 1, 0, false}; 
     ProcessControlBlock_t pcb2 = {3, 1, 1, false}; 
     ProcessControlBlock_t pcb3 = {2, 1, 2, false}; 
@@ -137,6 +116,48 @@ TEST(Priority, IdenticalPriorities)
     EXPECT_NEAR(result.average_waiting_time, 2.67, 0.1);
     EXPECT_NEAR(result.average_turnaround_time, 5.67, 0.1);
     EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(9)); 
+
+    dyn_array_destroy(ready_queue);
+}
+TEST(Priority, SingleProcess)
+{
+    dyn_array_t *ready_queue = dyn_array_create(1, sizeof(ProcessControlBlock_t), NULL);
+    ASSERT_NE(ready_queue, nullptr);
+
+	// Burst Time, Priority, Arrival Time
+    ProcessControlBlock_t pcb = {4, 1, 0, false}; 
+    dyn_array_push_back(ready_queue, &pcb);
+
+    ScheduleResult_t result;
+    ASSERT_TRUE(priority(ready_queue, &result));
+
+    EXPECT_EQ(result.average_waiting_time, 0.0);  
+    EXPECT_EQ(result.average_turnaround_time, 4.0);  
+    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(4));
+
+    dyn_array_destroy(ready_queue);
+}
+TEST(Priority, MixedArrivalTimes) {
+    dyn_array_t *ready_queue = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
+    ASSERT_NE(ready_queue, nullptr);
+
+    // Burst Time, Priority, Arrival Time
+    ProcessControlBlock_t pcb1 = {5, 3, 0, false}; 
+    ProcessControlBlock_t pcb2 = {3, 1, 2, false}; 
+    ProcessControlBlock_t pcb3 = {4, 2, 4, false}; 
+    ProcessControlBlock_t pcb4 = {2, 1, 6, false}; 
+
+    dyn_array_push_back(ready_queue, &pcb1);
+    dyn_array_push_back(ready_queue, &pcb2);
+    dyn_array_push_back(ready_queue, &pcb3);
+    dyn_array_push_back(ready_queue, &pcb4);
+
+    ScheduleResult_t result;
+    ASSERT_TRUE(priority(ready_queue, &result));
+
+    EXPECT_NEAR(result.average_waiting_time, 2.75, 0.1); 
+    EXPECT_NEAR(result.average_turnaround_time, 6.25, 0.1);
+    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(14)); 
 
     dyn_array_destroy(ready_queue);
 }
