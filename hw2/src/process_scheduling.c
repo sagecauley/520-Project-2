@@ -114,7 +114,8 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		if(currBlock ->arrival <= currTime )
 		{
 			totalWatingTime = currTime - currBlock->arrival;
-			totalTurnaroundTime = (currTime - currBlock->arrival) + currBlock->remaining_burst_time;	
+			totalTurnaroundTime = (currTime - currBlock->arrival) + currBlock->remaining_burst_time;
+			currTime += currBlock->remaining_burst_time;	
 		}
 		else
 		{
@@ -125,7 +126,7 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		}
 		//We ignore wait time in the same way as if this arrived at time 2 with nothing before it
 		totalRunTime+= currBlock->remaining_burst_time;
-		if(currInd == 0){
+		if(schedInd == 0){
 			dyn_array_pop_front(ready_queue);
 		}
 		else{
