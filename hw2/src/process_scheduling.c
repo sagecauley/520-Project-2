@@ -74,8 +74,55 @@ bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result)
 	if (ready_queue == NULL || result == NULL) {
 		return false;
 	}
-	int currTime = 0;
-
+	dyn_array_sort(ready_queue, compare_arrival_time);
+	ProcessControlBlock_t* currBlock = dyn_array_at(ready_queue, 0);
+	int currTime = currBlock->arrival + currBlock->remaining_burst_time;
+	int totalWatingTime = 0;
+	int totalTurnaroundTime = currBlock->remaining_burst_time;
+	int totalRunTime = currBlock->remaining_burst_time;
+	dyn_array_pop_front(ready_queue);
+	int currInd = 0;
+	int schedInd = 0;
+	int shortestTime = INT32_MAX;
+	size_t numPCB = dyn_array_size(ready_queue);
+	for(size_t i = 0; i < numPCB; i++)
+	{
+		currInd = 0;
+		schedInd = 0;
+		shortestTime = INT32_MAX;
+		currBlock = dyn_array_at(ready_queue, currInd);
+		while(currBlock->arrival <= currTime)
+		{
+			if(currBlock->remaining_burst_time < shortestTime && currBlock->started == 0)
+				schedInd = currInd;
+			currInd++;
+			currBlock = dyn_array_at(ready_queue, currInd);
+		}	
+		currBlock = dyn_array_at(ready_queue, schedInd);
+		if(currBlock ->arrival <= currTime )
+		{
+			totalWatingTime = currTime - currBlock->arrival;
+			totalTurnaroundTime = (currTime - currBlock->arrival) + currBlock->remaining_burst_time;	
+		}
+		else
+		{
+			totalTurnaroundTime+= currBlock->remaining_burst_time;
+			
+			// totalWatingTime += 0; This process did not wait at all
+			currTime = currBlock->arrival + currBlock->remaining_burst_time;
+		}
+		//We ignore wait time in the same way as if this arrived at time 2 with nothing before it
+		totalRunTime+= currBlock->remaining_burst_time;
+		if(currInd == 0){
+			dyn_array_pop_front(ready_queue);
+		}
+		else{
+			currBlock ->started = 1;
+		}
+	}
+	result->average_waiting_time = (float) totalWatingTime / (numPCB+1);
+	result->average_turnaround_time = (float)totalTurnaroundTime / (numPCB+1);
+	result->total_run_time = currTime;
 
 	/*
 	int shortestJob = INT32_MAX;
