@@ -20,10 +20,10 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 }
 
 int compare_arrival_time(const void* a, const void* b) {
-	const ProcessControlBlock_t *pcb1 = (const ProcessControlBlock_t*)a;
-	const ProcessControlBlock_t *pcb2 = (const ProcessControlBlock_t*)b;
+	ProcessControlBlock_t *pcb1 = (const ProcessControlBlock_t*)a;
+	ProcessControlBlock_t *pcb2 = (const ProcessControlBlock_t*)b;
 
-	return pcb1->arrival_time - pcb2->arrival_time;
+	return pcb1->arrival - pcb2->arrival;
 }
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
@@ -64,9 +64,37 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 bool shortest_job_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
 	//Need to use dyn_array_sort just not sure how atm
-	UNUSED(ready_queue);
-	UNUSED(result);
-	return false;
+	if (ready_queue == NULL || result == NULL) {
+		return false;
+	}
+	int currTime = 0;
+
+
+	/*
+	int shortestJob = INT32_MAX;
+	ProcessControlBlock_t* currBlock = NULL;
+	int startTime = 0;
+	float totalWait = 0;
+	size_t index = 0;
+	size_t numQueue = dyn_array_size(ready_queue);
+	for(size_t i = 0; i < numQueue; i++)
+	{
+		for(size_t j = 0; j < numQueue; j++)
+		{
+			currBlock = (ProcessControlBlock_t*)dyn_array_at(ready_queue, j);
+			if(i == 0 && j == 0)
+				startTime = currBlock->arrival;
+			if(currBlock->remaining_burst_time < shortestJob && currBlock ->started == 0)
+			{
+				shortestJob = currBlock->remaining_burst_time;
+				index = j;
+			}
+		}
+		if(currBlock == NULL)
+			return false;
+		totalWait += currBlock -> remaining_burst_time;
+	}*/
+	return true;
 }
 
 // Priority Helper Function: Sorting for priority-based scheduling
