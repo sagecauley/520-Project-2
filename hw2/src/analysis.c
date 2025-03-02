@@ -13,7 +13,7 @@
 // THIS IS NOT FINISHED.
 int main(int argc, char **argv) 
 {
-	if (argc < 3) 
+	if (argc < 3)
 	{
 		printf("%s <pcb file> <schedule algorithm> [quantum]\n", argv[0]);
 		return EXIT_FAILURE;

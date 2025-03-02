@@ -19,6 +19,13 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 	--process_control_block->remaining_burst_time;
 }
 
+int compare_remaining_time(const void* a, const void* b) {
+	const ProcessControlBlock_t* pcb1 = (const ProcessControlBlock_t*)a;
+	const ProcessControlBlock_t* pcb2 = (const ProcessControlBlock_t*)b;
+
+	return pcb1->remaining_burst_time - pcb2->remaining_burst_time;
+}
+
 int compare_arrival_time(const void* a, const void* b) {
 	ProcessControlBlock_t *pcb1 = (const ProcessControlBlock_t*)a;
 	ProcessControlBlock_t *pcb2 = (const ProcessControlBlock_t*)b;
@@ -154,10 +161,63 @@ bool priority(dyn_array_t *ready_queue, ScheduleResult_t *result)
 
 bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quantum) 
 {
-	UNUSED(ready_queue);
-	UNUSED(result);
-	UNUSED(quantum);
-	return false;
+	if (ready_queue == NULL || result == NULL) {
+		return false;
+	}
+
+	size_t n = dyn_array_size(ready_queue);
+	if (n == 0) {
+		return false;
+	}
+
+	//variables to hold the time
+	uint32_t total_waiting = 0;
+	uint32_t total_turnaround = 0;
+
+	dyn_array_sort(ready_queue, compare_arrival_time);
+
+
+	for (size_t i = 0; i < n; i++) {
+
+		//gets the specific element at i
+		ProcessControlBlock_t* pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
+		
+		if (pcb->remaining_burst_time > quantum) {
+			//to hold the element to be moved
+			void* data = malloc(sizeof(ProcessControlBlock_t));
+			//adds the total time to waiting before adding the current burst
+			total_waiting += total_turnaround;
+			total_turnaround += quantum;
+			pcb->remaining_burst_time -= quantum;
+			
+			if (dyn_array_extract_front(ready_queue, data)) {
+				if (dyn_array_push_back(ready_queue, data)) {
+					free(data);
+					n++;
+				}
+				else {
+					free(data);
+					return false;
+				}
+			}
+			else {
+				free(data);
+				return false;
+			}
+
+		}
+		else {
+			total_waiting += total_turnaround;
+			total_turnaround += pcb->remaining_burst_time;
+		}
+
+	}
+
+	result->average_waiting_time = (float)total_waiting / n;
+	result->average_turnaround_time = (float)total_turnaround / n;
+	result->total_run_time = total_turnaround;
+	
+	return true;
 }
 
 dyn_array_t *load_process_control_blocks(const char *input_file) 
@@ -211,12 +271,43 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
 	}
 
 	close(fd);
+
+	// Sort processes by arrival time
+	dyn_array_sort(ready_queue, compare_arrival_time);
 	return ready_queue;
 }
 
 bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
-	UNUSED(ready_queue);
-	UNUSED(result);
-	return false;
+	if (ready_queue == NULL || result == NULL) {
+		return false;
+	}
+
+	size_t n = dyn_array_size(ready_queue);
+	if (n == 0) {
+		return false;
+	}
+
+	//variables to hold the time
+	uint32_t total_waiting = 0;
+	uint32_t total_turnaround = 0;
+
+	dyn_array_sort(ready_queue, compare_remaining_time);
+
+
+	for (size_t i = 0; i < n; i++) {
+
+		//gets the specific element at i
+		ProcessControlBlock_t* pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
+
+		total_waiting += total_turnaround;
+		total_turnaround += pcb->remaining_burst_time;
+
+	}
+
+	result->average_waiting_time = (float)total_waiting / n;
+	result->average_turnaround_time = (float)total_turnaround / n;
+	result->total_run_time = total_turnaround;
+
+	return true;
 }
