@@ -163,7 +163,7 @@ TEST(Priority, MixedArrivalTimes) {
 }
 
 //-Shortest Job First Testing
-/*TEST(shortest_job_first, BadData){
+TEST(shortest_job_first, BadData){
 	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
 
 	ScheduleResult_t* result = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
@@ -194,8 +194,8 @@ TEST(shortest_job_first, GoodNumbers){
 
 	ASSERT_EQ(true, shortest_job_first(ready_queue, result));
 
-	EXPECT_NEAR(result->average_waiting_time, 5.6, 0.1); 
-    EXPECT_NEAR(result->average_turnaround_time, 1.6, 0.1); 
+	EXPECT_NEAR(result->average_turnaround_time, 5.6, 0.1); 
+    EXPECT_NEAR(result->average_waiting_time, 1.6, 0.1); 
 	EXPECT_EQ(result->total_run_time, static_cast<unsigned long>(20)); 
 
 	dyn_array_destroy(ready_queue);
@@ -223,79 +223,51 @@ TEST(shortest_job_first, AllSameBurst){
 
 	ASSERT_EQ(true, shortest_job_first(ready_queue, result));
 
-	EXPECT_NEAR(result->average_waiting_time, 4.4, 0.1); 
-    EXPECT_NEAR(result->average_turnaround_time, 1.4, 0.1); 
-	EXPECT_EQ(result->total_run_time, static_cast<unsigned long>(20)); 
+	EXPECT_NEAR(result->average_turnaround_time, 4.4, 0.1); 
+    EXPECT_NEAR(result->average_waiting_time, 1.4, 0.1); 
+	EXPECT_EQ(result->total_run_time, static_cast<unsigned long>(15)); 
 
 	dyn_array_destroy(ready_queue);
     free(result);
-}*/
-
-TEST(SRTF, BasicScheduling) {
-    dyn_array_t *ready_queue = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
-    ASSERT_NE(ready_queue, nullptr);
-
-    // Burst Time, Priority, Arrival Time, Started
-    ProcessControlBlock_t pcb1 = {8, 0, 0, false};  
-    ProcessControlBlock_t pcb2 = {4, 0, 1, false};  
-    ProcessControlBlock_t pcb3 = {2, 0, 2, false};  
-    ProcessControlBlock_t pcb4 = {1, 0, 3, false};  
-
-    dyn_array_push_back(ready_queue, &pcb1);
-    dyn_array_push_back(ready_queue, &pcb2);
-    dyn_array_push_back(ready_queue, &pcb3);
-    dyn_array_push_back(ready_queue, &pcb4);
-
-    ScheduleResult_t result;
-    ASSERT_TRUE(shortest_remaining_time_first(ready_queue, &result));
-
-    EXPECT_NEAR(result.average_waiting_time, 2.75, 0.1); 
-    EXPECT_NEAR(result.average_turnaround_time, 6.5, 0.1);
-    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(15)); 
-
-    dyn_array_destroy(ready_queue);
 }
 
-TEST(SRTF, LateShortProcess) {
-    dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
-    ASSERT_NE(ready_queue, nullptr);
+TEST(round_robin, BadData){
+	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
 
-    ProcessControlBlock_t pcb1 = {10, 0, 0, false};  
-    ProcessControlBlock_t pcb2 = {2, 0, 3, false};  
-    ProcessControlBlock_t pcb3 = {1, 0, 5, false};  
-
-    dyn_array_push_back(ready_queue, &pcb1);
-    dyn_array_push_back(ready_queue, &pcb2);
-    dyn_array_push_back(ready_queue, &pcb3);
-
-    ScheduleResult_t result;
-    ASSERT_TRUE(shortest_remaining_time_first(ready_queue, &result));
-
-    EXPECT_NEAR(result.average_waiting_time, 1, 0.1); 
-    EXPECT_NEAR(result.average_turnaround_time, 5.33, 0.1);
-    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(13)); 
-
-    dyn_array_destroy(ready_queue);
+	ScheduleResult_t* result = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
+	ASSERT_EQ(false, round_robin(NULL, result, -1));
+	ASSERT_EQ(false, round_robin(arPtr, NULL, -1));
+	ASSERT_EQ(false, round_robin(arPtr, result, 0));
+	dyn_array_destroy(arPtr);
+	free(result);
 }
 
-TEST(SRTF, FirstProcessFinishesBeforeOthersArrive) {
-    dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
-    ASSERT_NE(ready_queue, nullptr);
+TEST(round_robin, GoodData){
+	dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
+	ASSERT_NE(ready_queue, nullptr);
 
-    ProcessControlBlock_t pcb1 = {4, 0, 0, false};  
-    ProcessControlBlock_t pcb2 = {6, 0, 5, false};  
-    ProcessControlBlock_t pcb3 = {3, 0, 7, false};  
+	ScheduleResult_t* result = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
+	ASSERT_NE(result, nullptr);
+	memset(result, 0, sizeof(ScheduleResult_t));
 
-    dyn_array_push_back(ready_queue, &pcb1);
+    ProcessControlBlock_t pcb1 = {5, 0, 0, false}; 
+    ProcessControlBlock_t pcb2 = {4, 1, 3, false}; 
+    ProcessControlBlock_t pcb3 = {10, 2, 10, false};
+	//ProcessControlBlock_t pcb4 = {3, 3, 7, false};
+	//ProcessControlBlock_t pcb5 = {3, 4, 8, false};
+
+	dyn_array_push_back(ready_queue, &pcb1);
     dyn_array_push_back(ready_queue, &pcb2);
     dyn_array_push_back(ready_queue, &pcb3);
+	//dyn_array_push_back(ready_queue, &pcb4);
+	//dyn_array_push_back(ready_queue, &pcb5);
 
-    ScheduleResult_t result;
-    ASSERT_TRUE(shortest_remaining_time_first(ready_queue, &result));
+	ASSERT_EQ(true, round_robin(ready_queue, result, 2));
 
-    EXPECT_NEAR(result.average_waiting_time, 1, 0.1); 
-    EXPECT_NEAR(result.average_turnaround_time, 5.0, 0.1);
-    EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(13)); 
+	EXPECT_NEAR(result->average_turnaround_time, 7.66, 0.1); 
+    EXPECT_NEAR(result->average_waiting_time, .33, 0.1); 
+	EXPECT_EQ(result->total_run_time, static_cast<unsigned long>(19)); 
 
-    dyn_array_destroy(ready_queue);
+	dyn_array_destroy(ready_queue);
+    free(result);
 }

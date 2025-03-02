@@ -87,20 +87,20 @@ bool shortest_job_first(dyn_array_t* ready_queue, ScheduleResult_t* result)
 	int totalWatingTime = 0;
 	int totalTurnaroundTime = currBlock->remaining_burst_time;
 	int totalRunTime = currBlock->remaining_burst_time;
-	dyn_array_pop_front(ready_queue);
+	currBlock->started = 1;
 	size_t currInd = 0;
 	size_t schedInd = 0;
 	uint32_t shortestTime = __UINT32_MAX__;
-	size_t numPCB = dyn_array_size(ready_queue);
+	size_t numPCB = dyn_array_size(ready_queue) - 1;
 	for(size_t i = 0; i < numPCB; i++)
 	{
 		currInd = 0;
 		schedInd = 0;
 		shortestTime = __UINT32_MAX__;
 		currBlock = dyn_array_at(ready_queue, currInd);
-		while(currBlock->arrival <= currTime && currBlock->started == 0)
+		while(currInd < numPCB && currBlock->arrival <= currTime)
 		{
-			if(currBlock->remaining_burst_time < shortestTime)
+			if(currBlock->remaining_burst_time < shortestTime  && currBlock->started == 0)
 			{
 				schedInd = currInd;
 				shortestTime = currBlock->remaining_burst_time;
@@ -115,8 +115,8 @@ bool shortest_job_first(dyn_array_t* ready_queue, ScheduleResult_t* result)
 			currBlock = dyn_array_at(ready_queue, maxIndexSched+1);
 		if(currBlock ->arrival <= currTime)
 		{
-			totalWatingTime = currTime - currBlock->arrival;
-			totalTurnaroundTime = (currTime - currBlock->arrival) + currBlock->remaining_burst_time;
+			totalWatingTime += currTime - (currBlock->arrival);
+			totalTurnaroundTime += (currTime - currBlock->arrival) + currBlock->remaining_burst_time;
 			currTime += currBlock->remaining_burst_time;	
 		}
 		else
@@ -128,12 +128,7 @@ bool shortest_job_first(dyn_array_t* ready_queue, ScheduleResult_t* result)
 		}
 		//We ignore wait time in the same way as if this arrived at time 2 with nothing before it
 		totalRunTime+= currBlock->remaining_burst_time;
-		if(schedInd == 0){
-			dyn_array_pop_front(ready_queue);
-		}
-		else{
-			currBlock ->started = 1;
-		}
+		currBlock ->started = 1;
 		maxIndexSched = maxIndexSched > schedInd ? maxIndexSched : schedInd;
 	}
 	result->average_waiting_time = (float) totalWatingTime / (numPCB+1);
@@ -306,7 +301,7 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 	result->average_waiting_time = (float)total_waiting / n;
 	result->average_turnaround_time = (float)total_turnaround / n;
 	result->total_run_time = total_run;
-	dyn_array_destroy(ready_queue);
+	//dyn_array_destroy(ready_queue);
 	return true;
 }
 
