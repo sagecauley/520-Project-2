@@ -65,13 +65,12 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 		current += pcb->remaining_burst_time;
 		total_turnaround += current - pcb->arrival;
 		total_run += pcb->remaining_burst_time;
-		
+		free(pcb);
 	}
 
 	result->average_waiting_time = (float)total_waiting / n;
 	result->average_turnaround_time = (float)total_turnaround / n;
 	result->total_run_time =  total_run;
-
 	return true;
 }
 
@@ -170,6 +169,7 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 			if (pcb->started && pcb->arrival == pcb2->arrival && pcb2->started == false) {
 				pcb = pcb2;
 			}
+			free(pcb2);
 		}
 		
 		if (pcb->remaining_burst_time > quantum) {
@@ -197,6 +197,7 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 			total_turnaround += current - pcb ->arrival;
 			total_run += pcb->remaining_burst_time;
 		}
+		free(pcb);
 
 	}
 
@@ -278,17 +279,55 @@ bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *r
 	//variables to hold the time
 	uint32_t total_waiting = 0;
 	uint32_t total_turnaround = 0;
+	uint32_t current = 0;
+	uint32_t total_run = 0;
 
-	dyn_array_sort(ready_queue, compare_remaining_time);
+	dyn_array_sort(ready_queue, compare_arrival_time);
 
 
 	for (size_t i = 0; i < n; i++) {
 
 		//gets the specific element at i
 		ProcessControlBlock_t* pcb = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
+		if (current < pcb->arrival) {
+			current = pcb->arrival;
 
-		total_waiting += total_turnaround;
-		total_turnaround += pcb->remaining_burst_time;
+			total_waiting += current - pcb->arrival;
+
+			current += pcb->remaining_burst_time;
+			total_turnaround += current - pcb->arrival;
+			total_run += pcb->remaining_burst_time;
+
+
+
+		}
+
+		else {
+			ProcessControlBlock_t* pcb_shortest = pcb;
+			size_t element = i;
+
+			//Loops through all the elements that have come in since the last pcb was running
+			for (size_t j = i; j < n; j++) {
+				ProcessControlBlock_t* pcb2 = (ProcessControlBlock_t*)dyn_array_at(ready_queue, i);
+				if (pcb2->arrival < current && pcb2->remaining_burst_time < pcb_shortest->remaining_burst_time) {
+					pcb_shortest = pcb2;
+					element = j;
+				}
+				else if (pcb2->arrival > current) {
+					break;
+					free(pcb2);
+				}
+				free(pcb2);
+			}
+			
+			ProcessControlBlock_t* pcb3 = (ProcessControlBlock_t*)dyn_array_at(ready_queue, element);
+
+			total_waiting += current - pcb3->arrival;
+
+			current += pcb3->remaining_burst_time;
+			total_turnaround += current - pcb3->arrival;
+			total_run += pcb3->remaining_burst_time;
+		}
 
 	}
 
