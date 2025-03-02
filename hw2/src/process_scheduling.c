@@ -91,16 +91,16 @@ bool shortest_job_first(dyn_array_t* ready_queue, ScheduleResult_t* result)
 	size_t currInd = 0;
 	size_t schedInd = 0;
 	uint32_t shortestTime = __UINT32_MAX__;
-	size_t numPCB = dyn_array_size(ready_queue);
+	size_t numPCB = dyn_array_size(ready_queue) - 1;
 	for(size_t i = 0; i < numPCB; i++)
 	{
 		currInd = 0;
 		schedInd = 0;
 		shortestTime = __UINT32_MAX__;
 		currBlock = dyn_array_at(ready_queue, currInd);
-		while(currBlock->arrival <= currTime && currBlock->started == 0)
+		while(currBlock->arrival <= currTime)
 		{
-			if(currBlock->remaining_burst_time < shortestTime)
+			if(currBlock->remaining_burst_time < shortestTime  && currBlock->started == 0)
 			{
 				schedInd = currInd;
 				shortestTime = currBlock->remaining_burst_time;
@@ -115,8 +115,8 @@ bool shortest_job_first(dyn_array_t* ready_queue, ScheduleResult_t* result)
 			currBlock = dyn_array_at(ready_queue, maxIndexSched+1);
 		if(currBlock ->arrival <= currTime)
 		{
-			totalWatingTime = currTime - currBlock->arrival;
-			totalTurnaroundTime = (currTime - currBlock->arrival) + currBlock->remaining_burst_time;
+			totalWatingTime += currTime - currBlock->arrival;
+			totalTurnaroundTime += (currTime - currBlock->arrival) + currBlock->remaining_burst_time;
 			currTime += currBlock->remaining_burst_time;	
 		}
 		else

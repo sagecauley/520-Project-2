@@ -142,7 +142,7 @@ TEST(Priority, IdenticalPriorities)
 }
 
 //-Shortest Job First Testing
-/*TEST(shortest_job_first, BadData){
+TEST(shortest_job_first, BadData){
 	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
 
 	ScheduleResult_t* result = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
@@ -208,4 +208,4 @@ TEST(shortest_job_first, AllSameBurst){
 
 	dyn_array_destroy(ready_queue);
     free(result);
-}*/
+}
