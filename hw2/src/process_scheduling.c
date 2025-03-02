@@ -283,7 +283,7 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 	result->average_waiting_time = (float)total_waiting / n;
 	result->average_turnaround_time = (float)total_turnaround / n;
 	result->total_run_time = total_run;
-	
+	dyn_array_destroy(ready_queue);
 	return true;
 }
 
