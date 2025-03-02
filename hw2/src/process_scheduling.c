@@ -167,59 +167,75 @@ bool shortest_job_first(dyn_array_t* ready_queue, ScheduleResult_t* result)
 	return true;
 }
 
-// Priority Helper Function: Sorting for priority-based scheduling
-int compare_priority(const void *a, const void *b){
-	const ProcessControlBlock_t *pcb_a = (const ProcessControlBlock_t *)a;
-	const ProcessControlBlock_t *pcb_b = (const ProcessControlBlock_t *)b; 
-
-	if(pcb_a->priority == pcb_b->priority){
-		return(pcb_a->arrival - pcb_b->arrival);
-	}
-	
-	return(pcb_a->priority - pcb_b->priority);
-}
-
 bool priority(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
-	if(ready_queue == NULL || result == NULL){
-		return false;
-	}
+    if (ready_queue == NULL || result == NULL) {
+        return false;
+    }
 
-	size_t n = dyn_array_size(ready_queue);
-	if(n == 0){
-		return false;
-	}
+    size_t n = dyn_array_size(ready_queue);
+    if (n == 0) {
+        return false;
+    }
 
-	// Sort ready queue based on prirority and arrival time
-	dyn_array_sort(ready_queue, compare_priority);
+    // Sort by arrival time first! 
+    dyn_array_sort(ready_queue, compare_arrival_time);
 
-	uint32_t current_time = 0;
-	uint32_t total_waiting = 0;
-	uint32_t total_turnaround = 0;
+    uint32_t current_time = 0;
+    uint32_t total_waiting = 0;
+    uint32_t total_turnaround = 0;
+    size_t completed = 0;
+    bool processed[n];
+    memset(processed, 0, sizeof(processed));
 
-	for(size_t i = 0; i < n; i++){
-		ProcessControlBlock_t *pcb = (ProcessControlBlock_t *)dyn_array_at(ready_queue, i);
+    while (completed < n) {
+        ProcessControlBlock_t *highest_priority_pcb = NULL;
+        size_t highest_priority_index = -1;
 
-		// Make sure CPU time starts when process arrives
-		if(current_time < pcb->arrival){
-			current_time = pcb->arrival;
-		}
+        // Find highest-priority process that has arrived
+        for (size_t i = 0; i < n; i++) {
+            ProcessControlBlock_t *pcb = (ProcessControlBlock_t *)dyn_array_at(ready_queue, i);
+            if (!processed[i] && pcb->arrival <= current_time) {
+                if (highest_priority_pcb == NULL || pcb->priority < highest_priority_pcb->priority) {
+                    highest_priority_pcb = pcb;
+                    highest_priority_index = i;
+                }
+            }
+        }
 
-		uint32_t start_time = (current_time > pcb->arrival) ? current_time : pcb->arrival;
-        uint32_t waiting_time = start_time - pcb->arrival;
+        if (highest_priority_pcb == NULL) {
+            // Advance to next available process
+            for (size_t i = 0; i < n; i++) {
+                if (!processed[i]) {
+                    current_time = ((ProcessControlBlock_t *)dyn_array_at(ready_queue, i))->arrival;
+                    break;
+                }
+            }
+            continue;
+        }
+
+        // Mark process as completed and update timeline
+        processed[highest_priority_index] = true;
+        completed++;
+
+        if (current_time < highest_priority_pcb->arrival) {
+            current_time = highest_priority_pcb->arrival;
+        }
+
+        uint32_t start_time = current_time;
+        uint32_t waiting_time = start_time - highest_priority_pcb->arrival;
         total_waiting += waiting_time;
 
-		// Run for full burst time
-		current_time += pcb->remaining_burst_time;
-		uint32_t turnaround_time = current_time - pcb->arrival;
-		total_turnaround += turnaround_time;
-	}
+        current_time += highest_priority_pcb->remaining_burst_time;
+        uint32_t turnaround_time = current_time - highest_priority_pcb->arrival;
+        total_turnaround += turnaround_time;
+    }
 
-	result->average_waiting_time = (float)total_waiting / n;
-	result->average_turnaround_time = (float)total_turnaround / n;
-	result->total_run_time = current_time;
+    result->average_waiting_time = (float)total_waiting / n;
+    result->average_turnaround_time = (float)total_turnaround / n;
+    result->total_run_time = current_time;
 
-	return true;
+    return true;
 }
 
 bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quantum) 
