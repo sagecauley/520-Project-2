@@ -35,6 +35,9 @@ int main(int argc, char **argv)
 	char* algorithm = argv[2];
 	ScheduleResult_t result;
 
+	
+
+
 	if (memcmp(algorithm, FCFS, 4) == 0) {
 		if (first_come_first_serve(ready_queue, &result))
 		{
@@ -46,6 +49,58 @@ int main(int argc, char **argv)
 		else
 		{
 			printf("Error in FCFS scheduling\n");
+			return EXIT_FAILURE;
+		}
+	}
+	if (memcmp(algorithm, P, 1) == 0) {
+		if (priority(ready_queue, &result))
+		{
+			printf("P:\n");
+			printf("Average Waiting Time: %.2f\n", result.average_waiting_time);
+			printf("Average Turnaround Time: %.2f\n", result.average_turnaround_time);
+			printf("Total Run Time: %lu\n", result.total_run_time);
+		}
+		else
+		{
+			printf("Error in P scheduling\n");
+			return EXIT_FAILURE;
+		}
+	}
+	if (memcmp(algorithm, RR, 2) == 0) {
+		size_t quantum = 0;
+		for (int i = 0; argv[3][i] != '\0'; i++) {
+			if (argv[3][i] >= '0' && argv[3][i] <= '9') {
+				quantum = quantum * 10 + (argv[3][i] - '0');
+			}
+			else{
+				printf("Invalid quantum value\n");
+        		return EXIT_FAILURE;
+			}
+		}
+		if (round_robin(ready_queue, &result, quantum))
+		{
+			printf("RR:\n");
+			printf("Average Waiting Time: %.2f\n", result.average_waiting_time);
+			printf("Average Turnaround Time: %.2f\n", result.average_turnaround_time);
+			printf("Total Run Time: %lu\n", result.total_run_time);
+		}
+		else
+		{
+			printf("Error in RR scheduling\n");
+			return EXIT_FAILURE;
+		}
+	}
+	if (memcmp(algorithm, SJF, 3) == 0) {
+		if (shortest_job_first(ready_queue, &result))
+		{
+			printf("SJF:\n");
+			printf("Average Waiting Time: %.2f\n", result.average_waiting_time);
+			printf("Average Turnaround Time: %.2f\n", result.average_turnaround_time);
+			printf("Total Run Time: %lu\n", result.total_run_time);
+		}
+		else
+		{
+			printf("Error in SJF scheduling\n");
 			return EXIT_FAILURE;
 		}
 	}
