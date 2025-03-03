@@ -21,21 +21,22 @@ int main(int argc, char **argv)
 
 	dyn_array_t* ready_queue = NULL;
 
-	/*FILE* file = fopen(argv[1], "r");
-	if (!file) {
-		return EXIT_FAILURE;
-	}*/
 	//loading the queue up
 	ready_queue = load_process_control_blocks(argv[1]);
 
 	if (!ready_queue || dyn_array_size(ready_queue) == 0) {
+		printf("Loading Error, try adding ../ to the beginning of the file name\n");
 		return EXIT_FAILURE;
 	}
 
 	char* algorithm = argv[2];
 	ScheduleResult_t result;
 
-	
+	FILE *file = fopen("../README.md", "w");
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
 
 	//Checks to see which algoithm it is running
 	if (memcmp(algorithm, FCFS, 4) == 0) {
@@ -45,6 +46,10 @@ int main(int argc, char **argv)
 			printf("Average Waiting Time: %.2f\n", result.average_waiting_time);
 			printf("Average Turnaround Time: %.2f\n", result.average_turnaround_time);
 			printf("Total Run Time: %lu\n", result.total_run_time);
+			fprintf(file, "FCFS:\n");
+    		fprintf(file, "Average Waiting Time: %.2f\n", result.average_waiting_time);
+    		fprintf(file, "Average Turnaround Time: %.2f\n", result.average_turnaround_time);
+    		fprintf(file, "Total Run Time: %lu\n", result.total_run_time);
 		}
 		else
 		{
@@ -59,6 +64,10 @@ int main(int argc, char **argv)
 			printf("Average Waiting Time: %.2f\n", result.average_waiting_time);
 			printf("Average Turnaround Time: %.2f\n", result.average_turnaround_time);
 			printf("Total Run Time: %lu\n", result.total_run_time);
+			fprintf(file, "P:\n");
+    		fprintf(file, "Average Waiting Time: %.2f\n", result.average_waiting_time);
+    		fprintf(file, "Average Turnaround Time: %.2f\n", result.average_turnaround_time);
+    		fprintf(file, "Total Run Time: %lu\n", result.total_run_time);
 		}
 		else
 		{
@@ -84,6 +93,10 @@ int main(int argc, char **argv)
 			printf("Average Waiting Time: %.2f\n", result.average_waiting_time);
 			printf("Average Turnaround Time: %.2f\n", result.average_turnaround_time);
 			printf("Total Run Time: %lu\n", result.total_run_time);
+			fprintf(file, "RR:\n");
+    		fprintf(file, "Average Waiting Time: %.2f\n", result.average_waiting_time);
+    		fprintf(file, "Average Turnaround Time: %.2f\n", result.average_turnaround_time);
+    		fprintf(file, "Total Run Time: %lu\n", result.total_run_time);
 		}
 		else
 		{
@@ -98,6 +111,10 @@ int main(int argc, char **argv)
 			printf("Average Waiting Time: %.2f\n", result.average_waiting_time);
 			printf("Average Turnaround Time: %.2f\n", result.average_turnaround_time);
 			printf("Total Run Time: %lu\n", result.total_run_time);
+			fprintf(file, "SJF:\n");
+    		fprintf(file, "Average Waiting Time: %.2f\n", result.average_waiting_time);
+    		fprintf(file, "Average Turnaround Time: %.2f\n", result.average_turnaround_time);
+    		fprintf(file, "Total Run Time: %lu\n", result.total_run_time);
 		}
 		else
 		{
@@ -105,5 +122,6 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 	}
+	fclose(file);
 	return EXIT_SUCCESS;
 }
