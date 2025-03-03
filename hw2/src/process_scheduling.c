@@ -18,20 +18,21 @@ void virtual_cpu(ProcessControlBlock_t *process_control_block)
 	// decrement the burst time of the pcb
 	--process_control_block->remaining_burst_time;
 }
-
+//compares the burst time that is remaining on the pcb
 int compare_remaining_time(const void* a, const void* b) {
 	ProcessControlBlock_t* pcb1 = (ProcessControlBlock_t*)a;
 	ProcessControlBlock_t* pcb2 = (ProcessControlBlock_t*)b;
 
 	return pcb1->remaining_burst_time - pcb2->remaining_burst_time;
 }
-
+//Compares the arrival time of pcb
 int compare_arrival_time(const void* a, const void* b) {
 	ProcessControlBlock_t *pcb1 = (ProcessControlBlock_t*)a;
 	ProcessControlBlock_t *pcb2 = (ProcessControlBlock_t*)b;
 
 	return pcb1->arrival - pcb2->arrival;
 }
+//This will just run the pcbs in order of arrival time to complete their jobs
 bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
 	if (ready_queue == NULL || result == NULL) {
@@ -61,7 +62,7 @@ bool first_come_first_serve(dyn_array_t *ready_queue, ScheduleResult_t *result)
 			current = pcb->arrival;
 		}
 		total_waiting += current - pcb->arrival;
-
+		
 		current += pcb->remaining_burst_time;
 		total_turnaround += current - pcb->arrival;
 		total_run += pcb->remaining_burst_time;
@@ -361,7 +362,7 @@ dyn_array_t *load_process_control_blocks(const char *input_file)
 	dyn_array_sort(ready_queue, compare_arrival_time);
 	return ready_queue;
 }
-
+//This will preemtivly run over the array and then find the shortest remaining time and run that until a shorter job comes in
 bool shortest_remaining_time_first(dyn_array_t *ready_queue, ScheduleResult_t *result) 
 {
     if (ready_queue == NULL || result == NULL) {

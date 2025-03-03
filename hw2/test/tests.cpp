@@ -163,6 +163,7 @@ TEST(Priority, MixedArrivalTimes) {
 }
 
 //-Shortest Job First Testing
+//Tests the bad data for shortest job first
 TEST(shortest_job_first, BadData){
 	dyn_array_t * arPtr = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
 
@@ -172,6 +173,7 @@ TEST(shortest_job_first, BadData){
 	dyn_array_destroy(arPtr);
 	free(result);
 }
+//Tests some good numbers to make sure it runs right
 TEST(shortest_job_first, GoodNumbers){
 	dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
 	ASSERT_NE(ready_queue, nullptr);
@@ -179,7 +181,7 @@ TEST(shortest_job_first, GoodNumbers){
 	ScheduleResult_t* result = (ScheduleResult_t*)malloc(sizeof(ScheduleResult_t));
 	ASSERT_NE(result, nullptr);
 	memset(result, 0, sizeof(ScheduleResult_t));
-
+    // Burst Time, Priority, Arrival Time, Started
     ProcessControlBlock_t pcb1 = {5, 0, 0, false}; 
     ProcessControlBlock_t pcb2 = {2, 1, 3, false}; 
     ProcessControlBlock_t pcb3 = {3, 2, 5, false};
@@ -271,6 +273,7 @@ TEST(round_robin, GoodData){
 	dyn_array_destroy(ready_queue);
     free(result);
 }
+//Tests shortest remaining time first where this is just a typical pcb queue
 TEST(SRTF, BasicScheduling) {
     dyn_array_t *ready_queue = dyn_array_create(4, sizeof(ProcessControlBlock_t), NULL);
     ASSERT_NE(ready_queue, nullptr);
@@ -294,12 +297,13 @@ TEST(SRTF, BasicScheduling) {
     EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(15)); 
 
     dyn_array_destroy(ready_queue);
+    free(result);
 }
-
+//Tests shortest remaining time first where the later pcb's come in quite awhile after the first one has been running
 TEST(SRTF, LateShortProcess) {
     dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
     ASSERT_NE(ready_queue, nullptr);
-
+    // Burst Time, Priority, Arrival Time, Started
     ProcessControlBlock_t pcb1 = {10, 0, 0, false};  
     ProcessControlBlock_t pcb2 = {2, 0, 3, false};  
     ProcessControlBlock_t pcb3 = {1, 0, 5, false};  
@@ -316,12 +320,13 @@ TEST(SRTF, LateShortProcess) {
     EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(13)); 
 
     dyn_array_destroy(ready_queue);
+    free(result);
 }
-
+//Tests shortest remaining time first where the first process arrived finished before the other ones arrive
 TEST(SRTF, FirstProcessFinishesBeforeOthersArrive) {
     dyn_array_t *ready_queue = dyn_array_create(3, sizeof(ProcessControlBlock_t), NULL);
     ASSERT_NE(ready_queue, nullptr);
-
+    // Burst Time, Priority, Arrival Time, Started
     ProcessControlBlock_t pcb1 = {4, 0, 0, false};  
     ProcessControlBlock_t pcb2 = {6, 0, 5, false};  
     ProcessControlBlock_t pcb3 = {3, 0, 7, false};  
@@ -338,4 +343,5 @@ TEST(SRTF, FirstProcessFinishesBeforeOthersArrive) {
     EXPECT_EQ(result.total_run_time, static_cast<unsigned long>(13)); 
 
     dyn_array_destroy(ready_queue);
+    free(result);
 }

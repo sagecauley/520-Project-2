@@ -9,8 +9,7 @@
 #define RR "RR"
 #define SJF "SJF"
 
-// Add and comment your analysis code in this function.
-// THIS IS NOT FINISHED.
+// This will take in a comand and then run the correct algorithm over the array that is passed in
 int main(int argc, char **argv) 
 {
 	if (argc < 3)
