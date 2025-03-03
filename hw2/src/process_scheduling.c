@@ -240,20 +240,88 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 	}
 
 	size_t n = dyn_array_size(ready_queue);
-	if (n == 0) {
+	if (n <= 0) {
 		return false;
 	}
 
 	//variables to hold the time
 	uint32_t total_waiting = 0;
 	uint32_t total_turnaround = 0;
-	uint32_t current = 0;
+	//uint32_t current = 0;
 	uint32_t total_run = 0;
-
+	uint32_t completed = 0;
+	uint32_t currInd = 0;
+	uint32_t currTime = 0;
+	uint32_t oldTime = currTime;
+	ProcessControlBlock_t* currBlock = NULL;
+	uint32_t maxInd = 0;
 	dyn_array_sort(ready_queue, compare_arrival_time);
 
+	while(completed < n)
+	{
+		currInd = 0;
+		while(currInd < n)
+		{
+			currBlock = dyn_array_at(ready_queue, currInd);
+			if(currBlock ->arrival <= currTime&& currBlock->remaining_burst_time > 0)
+			{
+				if(currBlock->started == 0)
+				{
+					total_waiting += currTime - currBlock ->arrival;
+					currBlock->started = 1;
+				}
+				if(currBlock-> remaining_burst_time > quantum)
+				{
+					currBlock -> remaining_burst_time -= quantum;
+					currTime += quantum;
+					total_run += quantum;
+				}
+				else
+				{
+					currTime += currBlock->remaining_burst_time;
+					total_run += currBlock->remaining_burst_time;
+					currBlock->remaining_burst_time = 0;
+					total_turnaround += currTime - currBlock->arrival;
+					completed++;
+				}
+				
+				maxInd = maxInd > currInd ? maxInd : currInd;
+			}
+			currInd++;
+		}
 
-	for (size_t i = 0; i < n; i++) {
+		if(oldTime == currTime)
+		{
+			if(maxInd + 1 >= n)
+				return false;
+			currBlock = dyn_array_at(ready_queue, maxInd+1);
+			currTime = currBlock->arrival;
+			if(currBlock->started == 0)
+			{
+				total_waiting += currTime - currBlock ->arrival;
+				currBlock->started = 1;
+			}
+			if(currBlock-> remaining_burst_time > quantum)
+				{
+					currBlock -> remaining_burst_time -= quantum;
+					currTime += quantum;
+					total_run += quantum;
+				}
+				else
+				{
+					currTime += currBlock->remaining_burst_time;
+					total_run += currBlock->remaining_burst_time;
+					currBlock->remaining_burst_time = 0;
+					total_turnaround += currTime - currBlock->arrival;
+					completed++;
+				}
+
+				maxInd = maxInd +1;
+		}
+		oldTime = currTime;
+	}
+
+	/*for (size_t i = 0; i < n; i++) {
 		//needs to get sorted everytime before grabbing the next element because a new process might have arrived
 		dyn_array_sort(ready_queue, compare_arrival_time);
 		//gets the specific element at i
@@ -264,7 +332,7 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 			if (pcb->started && pcb->arrival == pcb2->arrival && pcb2->started == false) {
 				pcb = pcb2;
 			}
-			free(pcb2);
+			//free(pcb2);
 		}
 		
 		if (pcb->remaining_burst_time > quantum) {
@@ -292,9 +360,9 @@ bool round_robin(dyn_array_t *ready_queue, ScheduleResult_t *result, size_t quan
 			total_turnaround += current - pcb ->arrival;
 			total_run += pcb->remaining_burst_time;
 		}
-		free(pcb);
+		//free(pcb);
 
-	}
+	}*/
 
 	result->average_waiting_time = (float)total_waiting / n;
 	result->average_turnaround_time = (float)total_turnaround / n;
